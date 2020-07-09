@@ -33,12 +33,18 @@ func resourceAwsRoute53DelegationSet() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
+			"hosted_zone_id": {
+				Type: schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func resourceAwsRoute53DelegationSetCreate(d *schema.ResourceData, meta interface{}) error {
 	r53 := meta.(*AWSClient).r53conn
+
+	hostedZoneID := d.Get("hosted_zone_id").(string)
 
 	callerRef := resource.UniqueId()
 	if v, ok := d.GetOk("reference_name"); ok {
@@ -48,6 +54,7 @@ func resourceAwsRoute53DelegationSetCreate(d *schema.ResourceData, meta interfac
 	}
 	input := &route53.CreateReusableDelegationSetInput{
 		CallerReference: aws.String(callerRef),
+		HostedZoneId: aws.String(hostedZoneID),
 	}
 
 	log.Printf("[DEBUG] Creating Route53 reusable delegation set: %#v", input)
